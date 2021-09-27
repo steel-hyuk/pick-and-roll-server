@@ -1,6 +1,6 @@
-const Users = require('../models/users')
-const Posts = require('../models/posts')
-const Favorites = require('../models/favorites')
+const Users = require('../models/user')
+const { Post } = require('../models')
+//const Favorites = require('../models/favorites')
 const { generateAccessToken, sendAccessToken, isAuthorized } = require('../controllers/token/tokenController');
 
 module.exports = {
@@ -100,7 +100,7 @@ module.exports = {
             next(err)
         })
     },
-    favorite: (req, res, next) => {
+    /* favorite: (req, res, next) => {
         //favorite은 sql문이 필요
         let userName = req.params.id
         
@@ -114,13 +114,13 @@ module.exports = {
             console.log('favorite posts error!')
             next(err)
         })
-    },
+    }, */
     myRecipe: (req, res, next) => {
         // params.id를 Users.name 으로 사용할건지 Users.id로 사용할건지
         // Users.id는 다른 데이터들이 삭제돼도 번호를 그대로 유지하는지
         let userEmail = req.params.id //스키마도 맞춰서 수정
 
-        Posts.findAll({
+        Post.findAll({
             where: {UserId: userEmail}
         })
         .then(posts => {

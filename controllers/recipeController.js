@@ -1,8 +1,8 @@
-const Posts = require('../models/posts')
+const { Post } = require('../models')
 
 module.exports = {
     index: (req, res, next) => {
-        Posts.findAll({})
+        Post.findAll()
         .then(posts => {
             res.send({data: posts, message: "Find all posts!"})
         })
@@ -12,7 +12,7 @@ module.exports = {
         })
     },
     categoryView: (req, res, next) => {
-        Posts.findAll({
+        Post.findAll({
             where: { category: req.params.id }
         })
         .then(posts => {

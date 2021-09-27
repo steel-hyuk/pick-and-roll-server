@@ -1,7 +1,7 @@
-const Posts = require('../models/posts')
-const Favorites = require('../models/favorites')
-const TasteScores = require('../models/tastescores')
-const Comments = require('../models/comments')
+const Posts = require('../models/post')
+//const Favorites = require('../models/favorites')
+const TasteScores = require('../models/tastescore')
+const Comments = require('../models/comment')
 
 module.exports = {
     delete: (req, res, next) => {
@@ -16,6 +16,7 @@ module.exports = {
             next(err)
         });
     },
+    /*
     favoriteAdd: (req, res, next) => {
         let postId = req.params.id,
         userEmail = req.body.email
@@ -52,7 +53,7 @@ module.exports = {
             console.log('Favorite Delete Error!')
             next(err)
         })
-     },
+     },*/
      tasteScore: (req, res, next) => {
         let postId = req.params.id,
         userEmail = req.body.email,
