@@ -7,6 +7,7 @@ const cors = require('cors')
 const fs = require('fs')
 const https = require('https')
 const router = require('./routes/index')
+const db = require('./models');
 
 dotenv.config()
 const app = express();
@@ -26,6 +27,11 @@ app.use(session({
     },
     name: 'session-cookie'
 }))
+db.sequelize.sync()
+    .then(() => {
+        console.log('db 연결 성공');
+    })
+    .catch(console.error);
 
 app.use(cors({
     origin: 'https://localhost:3000',
