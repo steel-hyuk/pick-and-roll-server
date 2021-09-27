@@ -35,8 +35,8 @@ module.exports = {
             console.log('Favorite Add Error!')
             next(err)
         })  
-     },
-     favoriteDelete: (req, res, next) => {
+    },
+    favoriteDelete: (req, res, next) => {
         let postId = req.params.id,
         userEmail = req.body.email
         Favorites.destroy({
@@ -52,8 +52,8 @@ module.exports = {
             console.log('Favorite Delete Error!')
             next(err)
         })
-     },
-     tasteScore: (req, res, next) => {
+    },
+    tasteScore: (req, res, next) => {
         let postId = req.params.id,
         userEmail = req.body.email,
         score = req.body.score
@@ -74,8 +74,8 @@ module.exports = {
             console.log('Taste score Add Error!')
             next(err)
         })
-     },
-     easyScore: (req, res, next) => {
+    },
+    easyScore: (req, res, next) => {
         let postId = req.params.id,
         userEmail = req.body.email,
         score = req.body.score
@@ -96,8 +96,8 @@ module.exports = {
             console.log('Easy score Add Error!')
             next(err)
         })
-     },
-     commentAdd: (req, res, next) => {
+    },
+    commentAdd: (req, res, next) => {
         let postId = req.params.id,
         userEmail = req.body.email,
         content = req.body.content,
@@ -116,8 +116,8 @@ module.exports = {
             next(err)
         })
 
-     },
-     commentEdit: (req, res, next) => {
+    },
+    commentEdit: (req, res, next) => {
         let commentId = req.body.id,
         content = req.body.content,
         updateComment = {
@@ -133,8 +133,8 @@ module.exports = {
         .catch(err => {
             console.log('Update comment Error!')
         })
-     },
-     commentDelete: (req, res, next) => {
+    },
+    commentDelete: (req, res, next) => {
         let commentId = req.body.id
 
         Comments.destroy({
@@ -143,5 +143,5 @@ module.exports = {
         .then(() => {
             res.send({message: 'Comment delete success!!'})
         })
-     }     
+    }     
 }
