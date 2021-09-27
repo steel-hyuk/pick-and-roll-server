@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-const express = require('express');
-const dotenv = require('dotenv');
-
-=======
 const express = require('express')
 const morgan = require('morgan')
 const cookieParser = require('cookie-parser')
@@ -12,16 +7,12 @@ const cors = require('cors')
 const fs = require('fs')
 const https = require('https')
 const router = require('./routes/index')
->>>>>>> 93a9a09ae044bbf29a2e2c12a47a7381717cd498
 const db = require('./models');
 
 dotenv.config()
 const app = express();
 const port = 4000;
 
-<<<<<<< HEAD
-dotenv.config();
-=======
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
@@ -36,19 +27,12 @@ app.use(session({
     },
     name: 'session-cookie'
 }))
->>>>>>> 93a9a09ae044bbf29a2e2c12a47a7381717cd498
+
 db.sequelize.sync()
     .then(() => {
         console.log('db 연결 성공');
     })
     .catch(console.error);
-<<<<<<< HEAD
-
-app.get('/', (req, res) => {
-    res.send('hello');
-});
-=======
->>>>>>> 93a9a09ae044bbf29a2e2c12a47a7381717cd498
 
 app.use(cors({
     origin: 'https://localhost:3000',
