@@ -2,12 +2,11 @@ const router = require('express').Router()
 const postsController = require('../controllers/postsController')
 
 //게시글 작성
-//router.get('/write', postsController) // 필요할까?
 //router.post('/write', postsController) //sql필요
 
 //게시글 보여주는 페이지
-//router.get('/:id', postsController) // sql
-//router.get('/:id/edit', postsController) // client에서 관리?
+router.get('/:id', postsController.show) 
+//router.get('/:id/edit', postsController) // 서버에서 뿌려주는게 좋을 듯
 //router.put('/:id/update', postsController) // sql
 router.delete('/:id/delete', postsController.delete) 
 

@@ -1,13 +1,13 @@
-const Users = require('../models/user')
+const { User } = require('../models')
 const { Post } = require('../models')
 //const Favorites = require('../models/favorites')
 const { generateAccessToken, sendAccessToken, isAuthorized } = require('../controllers/token/tokenController');
 
 module.exports = {
     signIn: (req, res, next) => {
-        const { email } = req.body
-        Users.findOne({
-            where: { email }
+        const { email, password } = req.body
+        User.findOne({
+            where: { email, password }
         })
         .then( user => {
             let userData = user.dataValues
@@ -28,7 +28,7 @@ module.exports = {
         if(!email || !name || !password || !description ) {
             res.status(422).send('insufficient parameters supplied')
         }
-        Users.findOrCrate({
+        User.findOrCreate({
             where: {
                 email: email,
                 name: name,
@@ -67,7 +67,7 @@ module.exports = {
             res.status(401).send({ data: null, message: 'not authorized'})
         }
         const { email } = accessTokenData
-        user.findOne({
+        User.findOne({
             where: { email }
         })
         .then(user => {
@@ -89,7 +89,7 @@ module.exports = {
             description: req.body.description
         }
 
-        Users.update(userParams,{ 
+        User.update(userParams,{ 
             where: {email: userEmail} 
         })
         .then(() => {

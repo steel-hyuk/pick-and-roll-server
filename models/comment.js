@@ -3,6 +3,12 @@ module.exports = (sequelize, DataTypes) => {
         content: {
             type: DataTypes.STRING(200),
             allowNull: false
+        },
+        createdAt: {
+            type: DataTypes.DATE 
+        },
+        UserId: {
+            type: DataTypes.INTEGER
         }
     }, {
         charset: 'utf8mb4',
