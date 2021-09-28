@@ -13,10 +13,10 @@ module.exports = {
             where: { email, password }
         })
         .then( user => {
-            let userData = user.dataValues
             if(!user) {
-                return res.status(404).send('invalid user')
+                return res.status(404).send({data: null, message: 'invalid user'})
             }
+            let userData = user.dataValues
             delete userData.password
             const accessToken = generateAccessToken(userData)
             sendAccessToken(res, accessToken)
@@ -29,7 +29,7 @@ module.exports = {
     signUp: (req, res, next) => {
         const { email, name, password, description } = req.body
         if(!email || !name || !password || !description ) {
-            res.status(422).send('insufficient parameters supplied')
+            res.status(422).send({data: null, message: 'insufficient parameters supplied'})
         }
         User.findOrCreate({
             where: {
@@ -41,7 +41,7 @@ module.exports = {
         })
         .then(([data, created]) => {
             if(!created) {
-                res.status(409).send('email exists')
+                res.status(409).send({data: null, message: 'email exists'})
             }
             const accessToken = generateAccessToken(req.body)
             res.cookie('jwt', accessToken, {

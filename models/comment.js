@@ -4,12 +4,6 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING(200),
             allowNull: false
         },
-        createdAt: {
-            type: DataTypes.DATE 
-        },
-        UserId: {
-            type: DataTypes.INTEGER
-        }
     }, {
         tableName: 'comments',
         charset: 'utf8mb4',
