@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         }
     }, {
+        tableName: 'mainimgs',
         charset: 'utf8',
         collate: 'utf8_general_ci',
     });
