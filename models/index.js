@@ -8,6 +8,7 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
 db.Comment = require('./comment')(sequelize, Sequelize);
 db.Contentimage = require('./contentimage')(sequelize, Sequelize);
 db.Easyscore = require('./easyscore')(sequelize, Sequelize);
+db.Favorite = require('./favorite')(sequelize, Sequelize);
 db.Ingredient = require('./ingredient')(sequelize, Sequelize);
 db.Mainimg = require('./mainimg')(sequelize, Sequelize);
 db.Post = require('./post')(sequelize, Sequelize);

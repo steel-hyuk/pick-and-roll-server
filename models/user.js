@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         }
     }, {
+        tableName: 'users',
         charset: 'utf8', // 한글 쓰려면 utf8 사용
         collate: 'utf8_general_ci',
     });
@@ -27,8 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         db.User.hasMany(db.Comment);
         db.User.hasMany(db.Easyscore);
         db.User.hasMany(db.Tastescore);
-        db.User.belongsToMany(db.Post, { through: 'Favorites', as: 'Liked'});
-        // 중간 테이블 Favorites 생성, Post의 별칭 Liked
+        db.User.hasMany(db.Favorite);
     };
 
     return User;

@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         }
     }, {
+        tableName: 'ingredients',
         charset: 'utf8',
         collate: 'utf8_general_ci',
     });
