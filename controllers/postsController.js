@@ -1,5 +1,5 @@
 const { Post } = require('../models')
-//const Favorites = require('../models/favorites')
+const { Favorite } = require('../models')
 const { Tastescore } = require('../models')
 const { Easyscore } = require('../models')
 const { Comment } = require('../models')

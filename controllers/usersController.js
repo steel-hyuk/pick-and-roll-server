@@ -1,6 +1,9 @@
 const { User } = require('../models')
 const { Post } = require('../models')
-//const Favorites = require('../models/favorites')
+const { Tastescore } = require('../models')
+const { Easyscore } = require('../models')
+const { Mainimg } = require('../models')
+const { Favorite } = require('../models')
 const { generateAccessToken, sendAccessToken, isAuthorized } = require('../controllers/token/tokenController');
 
 module.exports = {
@@ -100,31 +103,98 @@ module.exports = {
             next(err)
         })
     },
-    /* favorite: (req, res, next) => {
-        //favorite은 sql문이 필요
-        let userName = req.params.id
+    favorite: (req, res, next) => {
+        let userEmail = req.params.id
         
-        Favorites.findAll({
-            where: {userId: userName}
+        User.findAll({
+            include: [
+                {model: Favorite, attributes: ['PostId']}
+            ],
+            where: {email: userEmail}
         })
-        .then(posts => {
-            res.send({data: posts, message: "Find all favorite posts!"})
+        .then( async (info) => {
+            let Data = await Promise.all(
+                info[0].Favorites.map( async (el) => {
+                    let value = await Post.findOne({
+                        include: [
+                            { model: Tastescore, attributes: ['score']},
+                            { model: Easyscore, attributes: ['score']},
+                            { model: Mainimg, attributes: ['src']},
+                        ],
+                        where: { id: el.PostId }
+                    })
+
+                    let tasteNum = value.Tastescores.length
+                    let tasteAvg = tasteNum === 0 ? 0 : value.Tastescores.reduce((el1, el2) => el1.score + el2.score)/tasteNum
+                    let easyNum = value.Easyscores.length
+                    let easyAvg = easyNum === 0 ? 0 : value.Easyscores.reduce((el1, el2) => el1.score + el2.score)/easyNum
+                    let mainImage = value.Mainimg
+                    
+                    const { id, title, introduction, category, createdAt} = value
+
+                    return {
+                        id,
+                        title,
+                        mainImage,
+                        introduction,
+                        category,
+                        tasteAvg: tasteAvg.toFixed(2),
+                        easyAvg: easyAvg.toFixed(2),
+                        createdAt
+                    }
+                })
+            )
+            if(Data.length === 0) res.send({data: null, message: "Your favorite doesn't exist"})
+            res.send({data: Data, message: "Find all favorite posts!"})
         })
         .catch(err => {
             console.log('favorite posts error!')
             next(err)
         })
-    }, */
+    },
     myRecipe: (req, res, next) => {
-        // params.id를 Users.name 으로 사용할건지 Users.id로 사용할건지
-        // Users.id는 다른 데이터들이 삭제돼도 번호를 그대로 유지하는지
-        let userEmail = req.params.id //스키마도 맞춰서 수정
+        let userEmail = req.params.id
 
-        Post.findAll({
-            where: {UserId: userEmail}
+        User.findAll({
+            include: [
+                {model: Post, attributes: ['id','title', 'introduction', 'category', 'createdAt']}
+            ],            
+            where: {email: userEmail}
         })
-        .then(posts => {
-            res.send({data: posts, message: "Find all myRecipe posts!"})
+        .then( async (info) => {
+            let Data = await Promise.all(
+                info[0].Posts.map( async (el) => {
+                    let value = await Post.findOne({
+                        include: [
+                            { model: Tastescore, attributes: ['score']},
+                            { model: Easyscore, attributes: ['score']},
+                            { model: Mainimg, attributes: ['src']},
+                        ],
+                        where: { id: el.id }
+                    })
+
+                    let tasteNum = value.Tastescores.length
+                    let tasteAvg = tasteNum === 0 ? 0 : value.Tastescores.reduce((el1, el2) => el1.score + el2.score)/tasteNum
+                    let easyNum = value.Easyscores.length
+                    let easyAvg = easyNum === 0 ? 0 : value.Easyscores.reduce((el1, el2) => el1.score + el2.score)/easyNum
+                    let mainImage = value.Mainimg
+                    
+                    const { id, title, introduction, category, createdAt} = value
+
+                    return {
+                        id,
+                        title,
+                        mainImage,
+                        introduction,
+                        category,
+                        tasteAvg: tasteAvg.toFixed(2),
+                        easyAvg: easyAvg.toFixed(2),
+                        createdAt
+                    }
+                })
+            )
+            if(Data.length === 0) res.send({data: null, message: "Your post doesn't exist"})
+            res.send({data: Data, message: "Find all myRecipe posts!"})
         })
         .catch(err => {
             console.log('myRecipe posts error!')
