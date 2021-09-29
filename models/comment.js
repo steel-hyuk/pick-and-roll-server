@@ -3,8 +3,9 @@ module.exports = (sequelize, DataTypes) => {
         content: {
             type: DataTypes.STRING(200),
             allowNull: false
-        }
+        },
     }, {
+        tableName: 'comments',
         charset: 'utf8mb4',
         collate: 'utf8mb4_general_ci',
     });

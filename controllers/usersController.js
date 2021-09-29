@@ -1,19 +1,22 @@
-const Users = require('../models/users')
-const Posts = require('../models/posts')
-const Favorites = require('../models/favorites')
+const { User } = require('../models')
+const { Post } = require('../models')
+const { Tastescore } = require('../models')
+const { Easyscore } = require('../models')
+const { Mainimg } = require('../models')
+const { Favorite } = require('../models')
 const { generateAccessToken, sendAccessToken, isAuthorized } = require('../controllers/token/tokenController');
 
 module.exports = {
     signIn: (req, res, next) => {
-        const { email } = req.body
-        Users.findOne({
-            where: { email }
+        const { email, password } = req.body
+        User.findOne({
+            where: { email, password }
         })
         .then( user => {
-            let userData = user.dataValues
             if(!user) {
-                return res.status(404).send('invalid user')
+                return res.status(404).send({data: null, message: 'invalid user'})
             }
+            let userData = user.dataValues
             delete userData.password
             const accessToken = generateAccessToken(userData)
             sendAccessToken(res, accessToken)
@@ -26,9 +29,9 @@ module.exports = {
     signUp: (req, res, next) => {
         const { email, name, password, description } = req.body
         if(!email || !name || !password || !description ) {
-            res.status(422).send('insufficient parameters supplied')
+            res.status(422).send({data: null, message: 'insufficient parameters supplied'})
         }
-        Users.findOrCrate({
+        User.findOrCreate({
             where: {
                 email: email,
                 name: name,
@@ -38,7 +41,7 @@ module.exports = {
         })
         .then(([data, created]) => {
             if(!created) {
-                res.status(409).send('email exists')
+                res.status(409).send({data: null, message: 'email exists'})
             }
             const accessToken = generateAccessToken(req.body)
             res.cookie('jwt', accessToken, {
@@ -67,7 +70,7 @@ module.exports = {
             res.status(401).send({ data: null, message: 'not authorized'})
         }
         const { email } = accessTokenData
-        user.findOne({
+        User.findOne({
             where: { email }
         })
         .then(user => {
@@ -89,7 +92,7 @@ module.exports = {
             description: req.body.description
         }
 
-        Users.update(userParams,{ 
+        User.update(userParams,{ 
             where: {email: userEmail} 
         })
         .then(() => {
@@ -101,14 +104,48 @@ module.exports = {
         })
     },
     favorite: (req, res, next) => {
-        //favorite은 sql문이 필요
-        let userName = req.params.id
+        let userEmail = req.params.id
         
-        Favorites.findAll({
-            where: {userId: userName}
+        User.findAll({
+            include: [
+                {model: Favorite, attributes: ['PostId']}
+            ],
+            where: {email: userEmail}
         })
-        .then(posts => {
-            res.send({data: posts, message: "Find all favorite posts!"})
+        .then( async (info) => {
+            let Data = await Promise.all(
+                info[0].Favorites.map( async (el) => {
+                    let value = await Post.findOne({
+                        include: [
+                            { model: Tastescore, attributes: ['score']},
+                            { model: Easyscore, attributes: ['score']},
+                            { model: Mainimg, attributes: ['src']},
+                        ],
+                        where: { id: el.PostId }
+                    })
+
+                    let tasteNum = value.Tastescores.length
+                    let tasteAvg = tasteNum === 0 ? 0 : value.Tastescores.reduce((el1, el2) => el1.score + el2.score)/tasteNum
+                    let easyNum = value.Easyscores.length
+                    let easyAvg = easyNum === 0 ? 0 : value.Easyscores.reduce((el1, el2) => el1.score + el2.score)/easyNum
+                    let mainImage = value.Mainimg
+                    
+                    const { id, title, introduction, category, createdAt} = value
+
+                    return {
+                        id,
+                        title,
+                        mainImage,
+                        introduction,
+                        category,
+                        tasteAvg: tasteAvg.toFixed(2),
+                        easyAvg: easyAvg.toFixed(2),
+                        createdAt
+                    }
+                })
+            )
+            if(Data.length === 0) res.send({data: null, message: "Your favorite doesn't exist"})
+            res.send({data: Data, message: "Find all favorite posts!"})
         })
         .catch(err => {
             console.log('favorite posts error!')
@@ -116,15 +153,48 @@ module.exports = {
         })
     },
     myRecipe: (req, res, next) => {
-        // params.id를 Users.name 으로 사용할건지 Users.id로 사용할건지
-        // Users.id는 다른 데이터들이 삭제돼도 번호를 그대로 유지하는지
-        let userEmail = req.params.id //스키마도 맞춰서 수정
+        let userEmail = req.params.id
 
-        Posts.findAll({
-            where: {UserId: userEmail}
+        User.findAll({
+            include: [
+                {model: Post, attributes: ['id','title', 'introduction', 'category', 'createdAt']}
+            ],            
+            where: {email: userEmail}
         })
-        .then(posts => {
-            res.send({data: posts, message: "Find all myRecipe posts!"})
+        .then( async (info) => {
+            let Data = await Promise.all(
+                info[0].Posts.map( async (el) => {
+                    let value = await Post.findOne({
+                        include: [
+                            { model: Tastescore, attributes: ['score']},
+                            { model: Easyscore, attributes: ['score']},
+                            { model: Mainimg, attributes: ['src']},
+                        ],
+                        where: { id: el.id }
+                    })
+
+                    let tasteNum = value.Tastescores.length
+                    let tasteAvg = tasteNum === 0 ? 0 : value.Tastescores.reduce((el1, el2) => el1.score + el2.score)/tasteNum
+                    let easyNum = value.Easyscores.length
+                    let easyAvg = easyNum === 0 ? 0 : value.Easyscores.reduce((el1, el2) => el1.score + el2.score)/easyNum
+                    let mainImage = value.Mainimg
+                    
+                    const { id, title, introduction, category, createdAt} = value
+
+                    return {
+                        id,
+                        title,
+                        mainImage,
+                        introduction,
+                        category,
+                        tasteAvg: tasteAvg.toFixed(2),
+                        easyAvg: easyAvg.toFixed(2),
+                        createdAt
+                    }
+                })
+            )
+            if(Data.length === 0) res.send({data: null, message: "Your post doesn't exist"})
+            res.send({data: Data, message: "Find all myRecipe posts!"})
         })
         .catch(err => {
             console.log('myRecipe posts error!')

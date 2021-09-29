@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         }
     }, {
+        tableName: 'posts',
         charset: 'utf8mb4', // 이모티콘 사용하려면 mb4
         collate: 'utf8mb4_general_ci',
     });
@@ -33,8 +34,7 @@ module.exports = (sequelize, DataTypes) => {
         db.Post.hasMany(db.Tastescore);
         db.Post.hasMany(db.Ingredient);
         db.Post.hasMany(db.Contentimage);
-        db.Post.belongsToMany(db.User, { through: 'Favorites', as: 'Likers'});
-        // 중간 테이블 Favorites 생성, User의 별칭 Likers
+        db.Post.hasMany(db.Favorite);
         db.Post.hasOne(db.Mainimg);
     };
 

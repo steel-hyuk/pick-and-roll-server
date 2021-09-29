@@ -10,7 +10,7 @@ module.exports = {
       httpOnly: true,
       path: '/'
     });
-    res.status(200).send({message: 'ok'})
+    res.status(200).send({message: 'SignIn ok!'})
   },
   isAuthorized: (req) => {
     const authorization = req.headers["cookie"];
