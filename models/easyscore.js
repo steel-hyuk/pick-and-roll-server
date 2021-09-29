@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         }
     }, {
+        tableName: 'easyscores',
         charset: 'utf8',
         collate: 'utf8_general_ci',
     });
