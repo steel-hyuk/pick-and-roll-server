@@ -19,7 +19,7 @@ module.exports = {
             let userData = user.dataValues
             delete userData.password
             const accessToken = generateAccessToken(userData)
-            sendAccessToken(res, accessToken)
+            sendAccessToken(res, accessToken, userData)
         })
         .catch(err => {
             console.log('signIn accessToken error!')

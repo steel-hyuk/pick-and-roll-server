@@ -5,12 +5,12 @@ module.exports = {
   generateAccessToken: (data) => {
     return sign(data, process.env.ACCESS_SECRET, { expiresIn: "1h" });
   },
-  sendAccessToken: (res, accessToken) => {
+  sendAccessToken: (res, accessToken, data) => {
     res.cookie("jwt", accessToken, {
       httpOnly: true,
       path: '/'
     });
-    res.status(200).send({message: 'SignIn ok!'})
+    res.status(200).send({data: data, message: 'SignIn ok!'})
   },
   isAuthorized: (req) => {
     const authorization = req.headers["cookie"];
