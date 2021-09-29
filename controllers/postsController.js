@@ -7,6 +7,7 @@ const { Comment } = require('../models')
 const { Ingredient } = require('../models')
 const { Contentimage } = require('../models')
 const { Mainimg } = require('../models')
+const { isAuthorized } = require('../controllers/token/tokenController')
 
 module.exports = {
     show: (req, res, next) => {
@@ -28,7 +29,9 @@ module.exports = {
             let easyNum = post.Easyscores.length
             let easyAvg = easyNum === 0 ? 0 : post.Easyscores.reduce((el1, el2) => el1.score + el2.score)/easyNum
             let seperateWords = post.content.split('@')
-            
+            let isMyPost = false // 내가 만든 게시물인지 확인여부
+            let isMyFavorite = false // 내가 등록한 즐겨찾기 게시물인지 확인여부
+
             const { id, UserId, title, introduction, category, requiredTime, createdAt, updatedAt, Mainimg, Contentimages, Ingredients, Comments } = post
             
             let commentData = await Promise.all(
@@ -42,12 +45,30 @@ module.exports = {
                     return result
                 })
             )
+            
+            //지금 로그인 중인 사용자 정보를 토큰에서 가져와서 사용자가 작성한 게시물인지, 사용자의 즐겨찾기 게시물인지 확인
+            const accessTokenData = isAuthorized(req)
+            if(accessTokenData) {
+                const { email } = accessTokenData
+                let findUserId = await User.findOne({
+                    where: { email }
+                })
+                if(findUserId.id === UserId) isMyPost = true
+                
+                let findFavoritePost = await Favorite.findOne({
+                    where: {
+                        UserId: findUserId.id,
+                        PostId: id
+                    }
+                })
+                if(!!findFavoritePost) isMyFavorite = true
+            }
 
-            //지금 포스트가 favorite에 등록이 됐는지 확인해주는 것도 필요함
-            //지금 포스트를 내가 만든건지 확인해주는 것도 필요함
             let postData = {
                 id,
                 UserId, //어떤 사용자가 게시물을 작성했는지 확인가능
+                isMyPost,
+                isMyFavorite,
                 title,
                 introduction,
                 category,
@@ -60,7 +81,7 @@ module.exports = {
                 Mainimg,
                 Contentimages,
                 Ingredients,
-                commentData
+                commentData,
             }
             res.send({data: postData, message: `Show post number: ${postId}`})
         })
