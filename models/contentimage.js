@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Contentimage.associate = (db) => {
-        db.Contentimage.belongsTo(db.Post);
+        db.Contentimage.belongsTo(db.Post, { onDelete: 'cascade' });
     };
 
     return Contentimage;

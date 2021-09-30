@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Tastescore.associate = (db) => {
-        db.Tastescore.belongsTo(db.Post);
+        db.Tastescore.belongsTo(db.Post, { onDelete: 'cascade' });
         db.Tastescore.belongsTo(db.User);
     };
 

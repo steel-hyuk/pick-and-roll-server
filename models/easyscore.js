@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Easyscore.associate = (db) => {
-        db.Easyscore.belongsTo(db.Post);
+        db.Easyscore.belongsTo(db.Post, { onDelete: 'cascade' });
         db.Easyscore.belongsTo(db.User);
     };
 

@@ -8,11 +8,12 @@ const { Ingredient } = require('../models')
 const { Contentimage } = require('../models')
 const { Mainimg } = require('../models')
 const { isAuthorized } = require('../controllers/token/tokenController')
+const { everyScoreSum } = require('../controllers/function/function')
 
 module.exports = {
-    writePost: (req, res, next) => {
+    writePost: async (req, res, next) => {
         let userParams = `{
-            "userId": "${req.body.userId}",
+            "UserId": "${req.body.userId}",
             "title": "${req.body.title}",
             "introduction": "${req.body.introduction}",
             "category": "${req.body.category}",
@@ -23,8 +24,55 @@ module.exports = {
             "ingredients": "${req.body.ingredients}"        
         }`
         
-        console.log(JSON.parse(userParams))
-        res.send('test중')
+        let postData = JSON.parse(userParams)
+        const { UserId, title, introduction, category, requiredTime, content, mainImg, contentImgs, ingredients} = postData
+
+        Post.findOrCreate({
+            where:{
+            title,
+            introduction,
+            category,
+            requiredTime,
+            content,
+            UserId            
+        }})
+        .then( async ([data, created]) => {
+            if(created) {
+                const postId = data.dataValues.id
+
+                await Mainimg.create({
+                    src: mainImg,
+                    PostId: postId
+                })
+                
+                let contentImgsArr = contentImgs.split(',')
+                await Promise.all(
+                    contentImgsArr.map( async (el) => {
+                        await Contentimage.create({
+                            src: el,
+                            PostId: postId
+                        })
+                    })
+                )
+
+                let ingredientsFirstSeperate = ingredients.split('@')
+                await Promise.all(
+                    ingredientsFirstSeperate.map( async (el) => {
+                        let ingredientsSecondSeperate = el.split(',')
+                        await Ingredient.create({
+                            ingredient: ingredientsSecondSeperate[0],
+                            amount: ingredientsSecondSeperate[1],
+                            PostId: postId
+                        })
+                    })
+                )
+            }
+            res.send({message: `${data.dataValues.title} post was made`})
+        })
+        .catch(err => {
+            console.log('warning!')
+            next(err)
+        })
     },
     show: (req, res, next) => {
         let postId = req.params.id
@@ -40,10 +88,11 @@ module.exports = {
             where: { id: postId }        
         })
         .then( async (post) => {
+
             let tasteNum = post.Tastescores.length
-            let tasteAvg = tasteNum === 0 ? 0 : post.Tastescores.reduce((el1, el2) => el1.score + el2.score)/tasteNum
+            let tasteAvg = tasteNum === 0 ? 0 : everyScoreSum(post.Tastescores)/tasteNum
             let easyNum = post.Easyscores.length
-            let easyAvg = easyNum === 0 ? 0 : post.Easyscores.reduce((el1, el2) => el1.score + el2.score)/easyNum
+            let easyAvg = easyNum === 0 ? 0 : everyScoreSum(post.Easyscores)/easyNum
             let seperateWords = post.content.split('@')
             let isMyPost = false // 내가 만든 게시물인지 확인여부
             let isMyFavorite = false // 내가 등록한 즐겨찾기 게시물인지 확인여부
@@ -106,6 +155,100 @@ module.exports = {
             next(err)
         })
     },
+    edit: (req, res, next) => {
+        let postId = req.params.id
+        Post.findOne({
+            include: [
+                { model: Mainimg, attributes: ['src']},
+                { model: Contentimage, attributes: ['src']},
+                { model: Ingredient, attributes: ['ingredient', 'amount']},
+            ],
+            where: { id: postId }        
+        })
+        .then( async (post) => {
+
+            let seperateWords = post.content.split('@')
+
+            const { id, UserId, title, introduction, category, requiredTime, Mainimg, Contentimages, Ingredients } = post         
+            
+            let postData = {
+                id,
+                UserId, //어떤 사용자가 게시물을 작성했는지 확인가능
+                title,
+                introduction,
+                category,
+                requiredTime,
+                content: seperateWords,
+                Mainimg,
+                Contentimages,
+                Ingredients
+            }
+            res.send({data: postData, message: `Edit post number: ${postId}`})
+        })
+        .catch(err => {
+            console.log(`Show ${postId} post Error!`)
+            next(err)
+        })
+    },
+    update: async (req, res, next) => {
+        let userParams = `{
+            "title": "${req.body.title}",
+            "introduction": "${req.body.introduction}",
+            "category": "${req.body.category}",
+            "requiredTime": "${req.body.requiredTime}",
+            "content": "${req.body.content}",
+            "mainImg": "${req.body.mainImg}",
+            "contentImgs": "${req.body.contentImgs}",
+            "ingredients": "${req.body.ingredients}"        
+        }`
+        
+        let postData = JSON.parse(userParams)
+        let postId = req.params.id
+        const { title, introduction, category, requiredTime, content, mainImg, contentImgs, ingredients} = postData
+        
+        let updatePostData = {
+            title,
+            introduction,
+            category,
+            requiredTime,
+            content,
+        }
+        try {
+            let contentImgsArr = contentImgs.split(',')
+            console.log(contentImgsArr)
+            let ingredientsFirstSeperate = ingredients.split('@')
+        await Post.update(updatePostData,{ where: {id: postId} })
+        await Mainimg.update({ src: mainImg },{ where: { PostId: postId }})
+
+        
+        await Promise.all(
+            contentImgsArr.map( async (el) => {
+                await Contentimage.destroy({where: {PostId: postId}})
+                await Contentimage.create({
+                    src: el,
+                    PostId: postId
+                })
+            })
+        )
+        
+        await Promise.all(
+            ingredientsFirstSeperate.map( async (el) => {
+                let ingredientsSecondSeperate = el.split(',')
+                await Ingredient.destroy({where: {PostId: postId}})
+                await Ingredient.create({
+                    ingredient: ingredientsSecondSeperate[0],
+                    amount: ingredientsSecondSeperate[1],
+                    PostId: postId
+                })
+            })
+        )
+        res.send({message: `${postId} post was update!!`})
+        } 
+        catch (err) {
+            console.log('Post Update Error!!')
+            next(err)
+        }          
+    },
     delete: (req, res, next) => {
         Post.destroy({
             where: {id: req.params.id}
@@ -138,6 +281,7 @@ module.exports = {
             next(err)
         })  
      },
+
      favoriteDelete: (req, res, next) => {
         let postId = req.params.id,
         userId = req.body.userId
@@ -217,7 +361,6 @@ module.exports = {
             console.log('New comment add Error!')
             next(err)
         })
-
      },
      commentEdit: (req, res, next) => {
         let commentId = req.body.id,

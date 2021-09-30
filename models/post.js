@@ -1,3 +1,5 @@
+const { Mainimg } = require(".");
+
 module.exports = (sequelize, DataTypes) => {
     const Post = sequelize.define('Post', {
         title: {
