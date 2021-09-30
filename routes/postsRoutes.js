@@ -2,7 +2,7 @@ const router = require('express').Router()
 const postsController = require('../controllers/postsController')
 
 //게시글 작성
-//router.post('/write', postsController) //sql필요
+router.post('/write', postsController.writePost) //sql필요
 
 //게시글 보여주는 페이지
 router.get('/:id', postsController.show) 

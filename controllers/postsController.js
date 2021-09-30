@@ -10,6 +10,22 @@ const { Mainimg } = require('../models')
 const { isAuthorized } = require('../controllers/token/tokenController')
 
 module.exports = {
+    writePost: (req, res, next) => {
+        let userParams = `{
+            "userId": "${req.body.userId}",
+            "title": "${req.body.title}",
+            "introduction": "${req.body.introduction}",
+            "category": "${req.body.category}",
+            "requiredTime": "${req.body.requiredTime}",
+            "content": "${req.body.content}",
+            "mainImg": "${req.body.mainImg}",
+            "contentImgs": "${req.body.contentImgs}",
+            "ingredients": "${req.body.ingredients}"        
+        }`
+        
+        console.log(JSON.parse(userParams))
+        res.send('test중')
+    },
     show: (req, res, next) => {
         let postId = req.params.id
         Post.findOne({
