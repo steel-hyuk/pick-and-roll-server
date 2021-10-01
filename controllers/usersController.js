@@ -5,6 +5,7 @@ const { Easyscore } = require('../models')
 const { Mainimg } = require('../models')
 const { Favorite } = require('../models')
 const { generateAccessToken, sendAccessToken, isAuthorized } = require('../controllers/token/tokenController');
+const { everyScoreSum } = require('../controllers/function/function')
 
 module.exports = {
     signIn: (req, res, next) => {
@@ -48,7 +49,7 @@ module.exports = {
                 httpOnly: true,
                 path: '/'
             })
-            res.status(201).send({message: 'ok'})
+            res.status(201).send({message: 'SignUp success!!'})
         })
         .catch(err => {
             console.log('signUp accessToken error!')
@@ -58,7 +59,7 @@ module.exports = {
     logout: (req, res, next) => {
         try {
             res.cookie('jwt','',{maxAge:0})
-            res.status(205).send('Logged out successfully')
+            res.status(205).send({message: 'Logged out successfully'})
         } catch (err) {
             console.log('logout error!')
             next(err)
@@ -85,9 +86,9 @@ module.exports = {
     },
     mypageUpdate: (req, res, next) => {
         let userEmail = req.params.id,
+        //사용자의 가입시 입력한 email은 수정 할 수 없습니다!
         userParams = {
             name: req.body.name,
-            email: req.body.email, //email도 바꿀 수 있나요?
             password: req.body.password,
             description: req.body.description
         }
@@ -122,14 +123,14 @@ module.exports = {
                             { model: Mainimg, attributes: ['src']},
                         ],
                         where: { id: el.PostId }
-                    })
+                    })                    
 
                     let tasteNum = value.Tastescores.length
-                    let tasteAvg = tasteNum === 0 ? 0 : value.Tastescores.reduce((el1, el2) => el1.score + el2.score)/tasteNum
+                    let tasteAvg = tasteNum === 0 ? 0 : everyScoreSum(value.Tastescores)/tasteNum
                     let easyNum = value.Easyscores.length
-                    let easyAvg = easyNum === 0 ? 0 : value.Easyscores.reduce((el1, el2) => el1.score + el2.score)/easyNum
+                    let easyAvg = easyNum === 0 ? 0 : everyScoreSum(value.Easyscores)/easyNum
                     let mainImage = value.Mainimg
-                    
+            
                     const { id, title, introduction, category, createdAt} = value
 
                     return {
@@ -171,12 +172,12 @@ module.exports = {
                             { model: Mainimg, attributes: ['src']},
                         ],
                         where: { id: el.id }
-                    })
+                    })                    
 
                     let tasteNum = value.Tastescores.length
-                    let tasteAvg = tasteNum === 0 ? 0 : value.Tastescores.reduce((el1, el2) => el1.score + el2.score)/tasteNum
+                    let tasteAvg = tasteNum === 0 ? 0 : everyScoreSum(value.Tastescores)/tasteNum
                     let easyNum = value.Easyscores.length
-                    let easyAvg = easyNum === 0 ? 0 : value.Easyscores.reduce((el1, el2) => el1.score + el2.score)/easyNum
+                    let easyAvg = easyNum === 0 ? 0 : everyScoreSum(value.Easyscores)/easyNum
                     let mainImage = value.Mainimg
                     
                     const { id, title, introduction, category, createdAt} = value

@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Favorite.associate = (db) => {
         db.Favorite.belongsTo(db.User);
-        db.Favorite.belongsTo(db.Post);
+        db.Favorite.belongsTo(db.Post, { onDelete: 'cascade' });
     };
 
     return Favorite;

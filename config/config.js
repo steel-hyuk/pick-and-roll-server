@@ -11,14 +11,14 @@ const config = {
   },
   test: {
     username: "root",
-    password: null,
+    password: process.env.DB_PASSWORD,
     database: "pick_and_roll",
     host: "127.0.0.1",
     dialect: "mysql"
   },
   production: {
     username: "root",
-    password: null,
+    password: process.env.DB_PASSWORD,
     database: "pick_and_roll",
     host: "127.0.0.1",
     dialect: "mysql"

@@ -2,11 +2,12 @@ const { Post } = require('../models')
 const { Tastescore } = require('../models')
 const { Easyscore } = require('../models')
 const { Mainimg } = require('../models')
+const { everyScoreSum } = require('../controllers/function/function')
 
 module.exports = {
     index: (req, res) => {
         res.send({ data: null, message: 'Please enter the word you want to search for'})
-    },
+    },    
     searchView: (req, res, next) => {
         let targetWord = req.params.id
         Post.findAll({})
@@ -23,12 +24,12 @@ module.exports = {
                             { model: Mainimg, attributes: ['src']},
                         ],
                         where: { id: el.id }
-                    })
+                    })        
 
                     let tasteNum = value.Tastescores.length
-                    let tasteAvg = tasteNum === 0 ? 0 : value.Tastescores.reduce((el1, el2) => el1.score + el2.score)/tasteNum
+                    let tasteAvg = tasteNum === 0 ? 0 : everyScoreSum(value.Tastescores)/tasteNum
                     let easyNum = value.Easyscores.length
-                    let easyAvg = easyNum === 0 ? 0 : value.Easyscores.reduce((el1, el2) => el1.score + el2.score)/easyNum
+                    let easyAvg = easyNum === 0 ? 0 : everyScoreSum(value.Easyscores)/easyNum
                     let mainImage = value.Mainimg
                     
                     const { id, title, introduction, category, createdAt} = value

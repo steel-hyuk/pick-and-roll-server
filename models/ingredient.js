@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Ingredient.associate = (db) => {
-        db.Ingredient.belongsTo(db.Post);
+        db.Ingredient.belongsTo(db.Post, { onDelete: 'cascade' });
     };
 
     return Ingredient;
