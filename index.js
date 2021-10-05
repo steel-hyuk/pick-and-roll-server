@@ -27,6 +27,7 @@ app.use(
       secure: false
     },
     name: 'session-cookie'
+
   })
 )
 db.sequelize
